@@ -1,4 +1,4 @@
-var mysqul = require('mysql');
+var mysql = require('mysql');
 var inquirer = require('inquirer');
 
 ////create the connection information for the mysql database////
@@ -10,7 +10,7 @@ var connection = mysql.createConnection({
     user: "root",
 
     ///Your Password///
-    password: "",
+    password: "Josh1995@10",
     database: "my_employee"
 });
 
@@ -84,4 +84,36 @@ function addEmployee(){
             }
         )
     })
+}
+
+//Remove an employee////
+function removeEmployee() {
+/// query the database for all the employees being removed
+connection.query("SELECT * FROM employee_list", function(err, results) {
+    if (err) throw err;
+    ///now that you have the employees, prompt the user to remove
+    inquirer
+    .prompt([
+        {
+            
+                name: "first",
+                type: "input",
+                message: "First Name?"
+            }, 
+            {
+                name: "last",
+                type:"input",
+                message:"Last Name?"
+            },
+            {
+                name:"role",
+                type: "input",
+                message: "What is their role?",
+                choices: ["Sales Lead", "Slaes Person", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead"]
+        }
+    ]).then(function(answer){
+        /////Remove the employee////
+        
+    })
+})
 }
