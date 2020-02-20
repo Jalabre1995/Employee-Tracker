@@ -49,20 +49,20 @@ function addEmployee(){
     inquirer
     .prompt([
         {
-            name: "add",
+            name: "first",
             type: "input",
             message: "First Name?"
         }, 
         {
-            name: "add",
+            name: "last",
             type:"input",
             message:"Last Name?"
         },
         {
-            name:"add",
+            name:"role",
             type: "input",
             message: "What is their role?",
-            choices: ["Sales Lead", "Slaes Person", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Tam Lead"]
+            choices: ["Sales Lead", "Slaes Person", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead"]
         }
 
 
@@ -71,7 +71,16 @@ function addEmployee(){
         connection.query(
             "INSERT INTO employee_list SET ?",
             {
+                first_name: answer.first,
+                last_name: answer.last,
+                role_id: answer.role
                 
+            },
+            function(err){
+                if(err) throw err;
+                console.log("Your employee has been added!");
+                //re-prompt the user for if they want to add or remove///
+                start();
             }
         )
     })
