@@ -74,13 +74,14 @@ function addEmployee(){
             type: "input",
             message: "What is their role?",
             choices: ["Sales Lead", "Sales Person", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead"]
-        }
+        },
+    
 
 
     ]).then(function(answer) { 
         ///insert the new employees/////
         connection.query(
-            "INSERT INTO employee_list SET ?",
+            "INSERT INTO employees SET ?",
             {
                 first_name: answer.first,
                 last_name: answer.last,
@@ -101,7 +102,7 @@ function addEmployee(){
 //Remove an employee////
 function removeEmployee() {
 /// query the database for all the employees being removed
-connection.query("SELECT * FROM employee_list", function(err, results) {
+connection.query("SELECT * FROM employees", function(err, results) {
     if (err) throw err;
     ///now that you have the employees, prompt the user to remove
     inquirer
@@ -121,12 +122,12 @@ connection.query("SELECT * FROM employee_list", function(err, results) {
                 name:"role",
                 type: "input",
                 message: "What is their role?",
-                choices: ["Sales Lead", "Slaes Person", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead"]
+                choices: ["Sales Lead", "Sales Person", "Lead Engineer", "Software Engineer", "Account Manager", "Accountant", "Legal Team Lead"]
         } 
     ]).then(function(answer){
         /////Remove the employee////
         connection.query(
-            "INSERT INTO employee_list SET ?",
+            "DELETE FROM employees WHERE id = ?",
             {
                 first_name: answer.first,
                 last_name: answer.last,
@@ -134,7 +135,7 @@ connection.query("SELECT * FROM employee_list", function(err, results) {
             },
             function(err) {
                 if (err) throw err;
-                console.log("Your employee was successfully removed!");
+                console.log(res.affectedRows + "Your employee was successfully removed!\n");
                 console.table(answer);
                 start();
             }
@@ -155,7 +156,7 @@ function viewEmployeesDepart(){
 
 ///function view all managers///
 function viewManager() {
-    connection.query("SELECT * FROM employee_list", function (err, answer) {
+    connection.query("SELECT * FROM employees", function (err, answer) {
         console.log("\n Departments Retreived from the Database \n");
         console.table(answer);
     })
@@ -164,19 +165,112 @@ function viewManager() {
 ////To view employees/////
 function viewEmployees() {
     console.log("retrieving employees from database");
-    var emp = 
-    "SELECT employee.id, employee.first_name, employee.last_name, role.title, deaprtment.name AS department, role.salary FROM employee "
-    connection.query (emp, function(err, answer) {
+    connection.query ("SELECT * FROM employees", function(err, answer) {
         console.log("\n Employees retrieved from the Database \n");
         console.table(answer);
     });
-    start();
+    start(); 
 }
 ///function to update/////
 function updateEmpRole() {
     let allemployes = [];
-    connection.query("SELECT * FROM employee_list", function(err, answer) {
+    connection.query("SELECT * FROM employees", function(err, answer) {
         console.log(answer);
-        
+        for (let i = 0; i < answer.length; i ++) {
+            let employeeString  = 
+            answer[i].id + "" + answer[i].first_name + "" + answer[i].last_name;
+            allemployes.push(employeeString);
+        }
+        //conosle.log(allemp)
+        inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "updateEmpRole",
+                message: "select employee to update role",
+                choices: allemployes
+            },
+            {
+                type: "list",
+                message: 'select new role',
+                choices: ["manager", "Sales Lead", "Sales Person", "Software Engineer", "Lead Engineer", "Accountant", "Accountant Manager","Legal Team Lead"],
+                name: "newrole"
+            }
+        ])
+        .then(function(answer){
+            console.log('going to update answer');
+            const idToUpdate = {};
+            idToUpdate.employeeId = parseInt(answer.updateEmpRole.split('')[0]);
+            if(answer.newrole === "manager") {
+                idToUpdate.role_id = 1;
+            }else if(answer.newrole === "Sales Lead") {
+                idToUpdate.role_id = 2;
+
+            }else if(answer.newrole === "Sales Person") {
+                idToUpdate.role_id = 3;
+            }else if(answer.newrole === "Software Engineer") {
+                idToUpdate.role_id = 4;
+            }else if(answer.newrole === "Lead Software Engineer") {
+                idToUpdate.role_id = 5;
+            }else if(answer.newrole === "Accountant") {
+                idToUpdate.role_id = 6;
+            }else if(answer.newrole === "Accountant Manager") {
+                idToUpdate.role_id = 7;
+            }else if(answer.role_id === "Legal Team Lead") {
+                idToUpdate.role_id = 8;
+            }
+            connection.query(
+                "UPDATE employees SET role_id = ? WHERE id = ?",
+                [idToUpdate.role_id, idToUpdate.employeeId],
+                function(err, data){
+                    console.table(answer)
+                    start();
+                }
+            )
+        })
     })
 }
+////update manager function//////
+
+
+function updateManager() {
+    let allemployes = [];
+    connection.query("SELECT * FROM employees", function(err, answer) {
+        console.log(answer);
+        for (let i = 0; i < answer.length; i ++) {
+            let employeeString  = 
+            answer[i].id + "" + answer[i].first_name + "" + answer[i].last_name;
+            allemployes.push(employeeString);
+        }
+        //conosle.log(allemp)
+        inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "updateManager",
+                message: "Select New Manager.",
+                choices: allemployes
+            }
+           
+        ])
+        .then(function(answer){
+            console.log('going to update answer');
+            const idToUpdate = {};
+            idToUpdate.employeeId = parseInt(answer.updateEmpRole);
+            if(answer.newrole === "manager") {
+                idToUpdate.role_id = 1;
+            } 
+            connection.query(
+                "UPDATE employees SET manager_id = ? WHERE id = ?",
+                [idToUpdate.role_id, idToUpdate.employeeId],
+                function(err, data){
+                    console.table(answer)
+                    start();
+                }
+            )
+        })
+    })
+
+}
+
+
